@@ -48,3 +48,5 @@ terraform.rc
 .env
 .vscode/
 tmp/
+
+!staging.tfvars
