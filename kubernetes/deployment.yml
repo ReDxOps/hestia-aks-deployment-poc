@@ -1,0 +1,85 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hestia-loyalty
+  namespace: hestia-staging
+  labels:
+    app: hestia-loyalty
+    environment: staging
+spec:
+  # 1 seul réplica pour le POC (FinOps)
+  replicas: 1
+  # 0-downtime, K8s démarre le nouveau pod en plus => wait => delete l'ancien
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: hestia-loyalty
+  template:
+    metadata:
+      labels:
+        app: hestia-loyalty
+        environment: staging
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 5000 # UID défini dans le Dockerfile
+        runAsGroup: 5000 # GID défini dans le Dockerfile
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "hestia-kv-secrets"
+      containers:
+        - name: hestia-loyalty-staging
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          image: acrpochestiaaks.azurecr.io/hestia-loyalty:__IMAGE_TAG__ # Placeholder, remplacé par le Build.SourceVersion en CI/CD
+          ports:
+            - containerPort: 3000
+          # Equivalent du env_file de docker compose
+          volumeMounts:
+            - name: secrets-store01-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: hestia-loyalty-staging-config
+            - secretRef:
+                name: hestia-loyalty-staging-secrets
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+
+          startupProbe: # Test d'accès à la route de base de l'app pour le start
+            httpGet:
+              path: "/"
+              port: 3000
+            periodSeconds: 5
+            failureThreshold: 30
+
+          readinessProbe: # BDD est elle prête à recevoir les rêquetes ?
+            httpGet:
+              path: "/api/health"
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 3
+
+          livenessProbe: # Test d'accès à la route de base de l'app en exec
+            httpGet:
+              path: "/"
+              port: 3000
+            periodSeconds: 20
+            failureThreshold: 5
