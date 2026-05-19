@@ -21,6 +21,10 @@ resource "azurerm_kubernetes_cluster" "k8s_cluster_poc_hestia_aks" {
     type = "SystemAssigned"
   }
 
+  key_vault_secrets_provider {
+    secret_rotation_enabled = true
+  }
+
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
 
