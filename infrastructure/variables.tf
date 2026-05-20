@@ -13,7 +13,7 @@ variable "rg_poc_hestia_aks_name" {
 variable "rg_poc_hestia_aks_location" {
   description = "Localisation du du resource groupe"
   type        = string
-  default     = "West Europe"
+  default     = "France Central"
 }
 
 variable "vnet_poc_hestia_aks_cidr" {
