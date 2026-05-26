@@ -66,6 +66,12 @@ stages:
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
+                # Authentifier kubectl auprès du cluster AKS
+                az aks get-credentials --resource-group $(azureResourceGroup) --name $(k8sCluster) --overwrite-existing
+
+                # Créer le namespace hestia-staging s'il n'existe pas
+                kubectl apply -f $(Pipeline.Workspace)/k8s-manifests/namespace.yml
+
                 # Récupérer l'ID Client de l'identité du secrets-provider sur AKS
                 CLIENT_ID=$(az aks show --resource-group $(azureResourceGroup) --name $(k8sCluster) --query addonProfiles.azureKeyvaultSecretsProvider.identity.clientId -o tsv)
 
@@ -75,7 +81,7 @@ stages:
                 # Remplacer les placeholders dans le manifeste Kubernetes
                 sed -i "s|__IDENTITY_CLIENT_ID__|$CLIENT_ID|g" $(Pipeline.Workspace)/k8s-manifests/secretproviderclass.yml
                 sed -i "s|__TENANT_ID__|$TENANT_ID|g" $(Pipeline.Workspace)/k8s-manifests/secretproviderclass.yml
-            displayName: "Inject Key Vault Secrets Provider Identifiers"
+            displayName: "Inject Key Vault Secrets Provider Identifiers & Create Namespace"
 
           - task: KubernetesManifest@1
             inputs:
