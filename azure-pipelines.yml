@@ -9,6 +9,7 @@ pool:
 
 variables:
   azureServiceConnection: "sc-hestia-poc-staging"
+  dockerRegistryServiceConnection: "sc-hestia-acr"
   acrName: "acrpochestiaaks.azurecr.io"
   imageRepository: "hestia-loyalty"
   k8sNamespace: "hestia-staging"
@@ -36,7 +37,7 @@ stages:
               tags: |
                 $(Build.SourceVersion)
                 latest
-              containerRegistry: $(azureServiceConnection)
+              containerRegistry: $(dockerRegistryServiceConnection)
               repository: $(imageRepository)
 
           - task: PublishPipelineArtifact@1
