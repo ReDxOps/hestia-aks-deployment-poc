@@ -4,7 +4,6 @@ resource "azurerm_virtual_network" "vnet_poc_hestia_aks" {
   location            = azurerm_resource_group.rg_poc_hestia_aks.location
   resource_group_name = azurerm_resource_group.rg_poc_hestia_aks.name
   address_space       = var.vnet_poc_hestia_aks_cidr
-  dns_servers         = ["10.0.0.4", "10.0.0.5"]
 
   tags = {
     environment = var.env
