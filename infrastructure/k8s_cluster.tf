@@ -8,13 +8,15 @@ resource "azurerm_kubernetes_cluster" "k8s_cluster_poc_hestia_aks" {
     name                 = "nodes"
     node_count           = 1
     auto_scaling_enabled = false
-    vm_size              = "Standard_B2s"
+    vm_size              = "Standard_D2s_v3"
     vnet_subnet_id       = azurerm_subnet.subnet_poc_hestia_aks.id
   }
 
   network_profile {
     network_plugin    = "azure"
     load_balancer_sku = "standard"
+    service_cidr      = "172.16.0.0/16"
+    dns_service_ip    = "172.16.0.10"
   }
 
   identity {
