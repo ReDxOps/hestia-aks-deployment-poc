@@ -23,8 +23,10 @@ stages:
       - job: build_and_push
         displayName: Build & Push Docker Image
         steps:
-          - bash: git clone https://$(GITHUB_TOKEN)@github.com/DonMarax/Hestia-loyalty.git app-code
+          - bash: git clone https://$GITHUB_TOKEN@github.com/DonMarax/Hestia-loyalty.git app-code
             displayName: "Clone of Next.js application"
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
 
           - task: Docker@2
             inputs:
