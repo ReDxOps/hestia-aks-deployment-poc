@@ -40,10 +40,6 @@ spec:
               secretProviderClass: "hestia-kv-secrets"
       containers:
         - name: postgres-db-staging
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
           image: postgres:18
           env:
             - name: POSTGRES_PASSWORD
@@ -55,7 +51,7 @@ spec:
             - containerPort: 5432
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
             - name: secrets-store01-inline
               mountPath: "/mnt/secrets-store"
               readOnly: true
